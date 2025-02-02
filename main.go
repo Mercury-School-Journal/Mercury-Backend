@@ -6,7 +6,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
-	_"github.com/mattn/go-sqlite3"
+	_"modernc.org/sqlite"
 	"database/sql"
 	"net/http"
 	"time"
@@ -31,7 +31,7 @@ var db *sql.DB
 
 func init() {
 	var err error
-	db, err = sql.Open("sqlite3", "./users.db")
+	db, err = sql.Open("sqlite", "./users.db")
 	if err != nil {
 		log.Fatal(err)
 	}
