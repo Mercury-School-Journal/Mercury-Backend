@@ -21,7 +21,7 @@ func RegisterUser(c *gin.Context) {
 
 
 	var existingUser User
-	err := db.QueryRow("SELECT id, email, password FROM users WHERE email = ?", user.Email).Scan(&existingUser.ID, &existingUser.Email, &existingUser.Password)
+	err := db.QueryRow("SELECT uid, email, password FROM users WHERE email = ?", user.Email).Scan(&existingUser.UID, &existingUser.Email, &existingUser.Password)
 	if err == nil {
 		c.JSON(http.StatusConflict, gin.H{"message": "Email already taken"})
 		return
@@ -51,7 +51,7 @@ func Login(c *gin.Context) {
 	}
 
 	var storedUser User
-	err := db.QueryRow("SELECT id, email, password FROM users WHERE email = ?", user.Email).Scan(&storedUser.ID, &storedUser.Email, &storedUser.Password)
+	err := db.QueryRow("SELECT uid, email, password FROM users WHERE email = ?", user.Email).Scan(&storedUser.UID, &storedUser.Email, &storedUser.Password)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid credentials"})
 		return
@@ -94,7 +94,7 @@ func ChangePassword(c *gin.Context) {
 	username, _ := c.Get("username")
 
 	var user User
-	err := db.QueryRow("SELECT id, email, password FROM users WHERE email = ?", username).Scan(&user.ID, &user.Email, &user.Password)
+	err := db.QueryRow("SELECT uid, email, password FROM users WHERE email = ?", username).Scan(&user.UID, &user.Email, &user.Password)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
 		return

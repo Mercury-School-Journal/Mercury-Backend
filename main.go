@@ -22,16 +22,16 @@ func init() {
 	}
 	jwtKey = []byte(key)
 
-	db, err = sql.Open("sqlite", "./users.db")
+	db, err = sql.Open("sqlite", "./database.db")
+	schema, err := os.ReadFile("schema.sql")
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS users (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		email TEXT UNIQUE,
-		password TEXT
-	);`)
+	_, err = db.Exec("PRAGMA foreign_keys = ON")
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = db.Exec(string(schema))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -52,9 +52,24 @@ func main() {
 		r.PUT("/api/change-password", ChangePassword)
 		r.DELETE("/api/delete-account", DeleteAccount)
 	}
-	r.POST("/api/register", RegisterUser)
+	r.Use(AdminAuthMiddleware())
+	{
+		r.POST("/api/register", RegisterUser)
+		r.POST("/api/timetable", AddTimetableEntry)
+	}
+	r.Use(TeacherAuthMiddleware())
+	{
+		r.POST("/api/grades/:user_id", AddGrade)
+		r.GET("/api/grades/:user_id", GetGrades)
+	}	
 	r.POST("/api/login", Login)
 	r.GET("/api/ping",Ping)
+	
+	r.POST("/api/grades", AddGrade)
+	r.GET("/api/grades/:user_id", GetGrades)
+	
+	r.GET("/api/timetable", GetTimetable)
+	
 
 	// err := r.RunTLS(":10800", "cert.pem", "key.pem") //  for HTTPS
 	err := r.Run(":10800")
