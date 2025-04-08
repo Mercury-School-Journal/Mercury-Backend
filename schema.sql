@@ -15,7 +15,6 @@ CREATE TABLE IF NOT EXISTS students (
     birth_date TEXT,
     address TEXT,
     phone TEXT,
-    email TEXT,
     FOREIGN KEY(user_id) REFERENCES users(uid)
 );
 
@@ -27,7 +26,6 @@ CREATE TABLE IF NOT EXISTS teachers (
     birth_date TEXT,
     address TEXT,
     phone TEXT,
-    email TEXT,
     FOREIGN KEY(user_id) REFERENCES users(uid)
 );
 

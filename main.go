@@ -21,8 +21,19 @@ func init() {
 		log.Fatal("jwtKey environment variable is not set")
 	}
 	jwtKey = []byte(key)
-
+	adminEmail, exists := os.LookupEnv("adminEmail")
+	if !exists {
+		log.Fatal("adminEmail environment variable is not set")
+	}
+	adminPassword, exists := os.LookupEnv("adminPassword")
+	if !exists {
+		log.Fatal("adminPassword environment variable is not set")
+	}
 	db, err = sql.Open("sqlite", "./database.db")
+	if err != nil {
+		log.Fatal(err)
+	}
+	if !TableExists("users") {
 	schema, err := os.ReadFile("schema.sql")
 	if err != nil {
 		log.Fatal(err)
@@ -35,6 +46,17 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	hashedPassword, err := HashPassword(adminPassword)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	adminPassword = hashedPassword
+	_, err = db.Exec("INSERT INTO users (email, password, role) VALUES (?, ?, 'admin');",adminEmail, adminPassword)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
 }
 
 func main() {
@@ -47,6 +69,9 @@ func main() {
         AllowCredentials: true,
         MaxAge: 12 * time.Hour,
     }))
+	r.POST("/api/login", Login)
+	r.GET("/api/ping",Ping)
+	r.GET("/api/timetable", GetTimetable)
 	r.Use(TokenAuthMiddleware())
 	{
 		r.PUT("/api/change-password", ChangePassword)
@@ -60,15 +85,8 @@ func main() {
 	r.Use(TeacherAuthMiddleware())
 	{
 		r.POST("/api/grades/:user_id", AddGrade)
-		r.GET("/api/grades/:user_id", GetGrades)
 	}	
-	r.POST("/api/login", Login)
-	r.GET("/api/ping",Ping)
-	
-	r.POST("/api/grades", AddGrade)
-	r.GET("/api/grades/:user_id", GetGrades)
-	
-	r.GET("/api/timetable", GetTimetable)
+
 	
 
 	// err := r.RunTLS(":10800", "cert.pem", "key.pem") //  for HTTPS

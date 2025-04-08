@@ -26,4 +26,4 @@ go.work.sum
 
 cert.pem
 key.pem
-users.db
+database.db
