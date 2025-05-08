@@ -258,7 +258,7 @@ func addGrade(reader *bufio.Reader) {
 	subjectID, _ := reader.ReadString('\n')
 	fmt.Print("Grade (e.g. 5, A, etc): ")
 	grade, _ := reader.ReadString('\n')
-	fmt.Print("Grade Type (e.g. test, homework): ")
+	fmt.Print("Grade Type ('numeric', 'comment', 'custom'): ")
 	gradeType, _ := reader.ReadString('\n')
 	fmt.Print("Date (YYYY-MM-DD): ")
 	date, _ := reader.ReadString('\n')
