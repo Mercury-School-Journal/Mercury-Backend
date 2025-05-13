@@ -61,11 +61,16 @@ CREATE TABLE IF NOT EXISTS grades (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL, -- Student ID
     subject_id INTEGER NOT NULL, -- Subject ID
+    teacher_id INTEGER NOT NULL, -- Teacher ID
+    exam_id INTEGER, -- exam ID (optional)
     grade TEXT NOT NULL CHECK(length(grade) <= 255), -- Numeric grade (e.g., "5", "4.5"), comment (e.g., "Missing homework"), or custom value (e.g., "Pass")
-    grade_type TEXT NOT NULL CHECK(grade_type IN ('numeric', 'comment', 'custom')), -- Type of entry: numeric, comment, or custom
+    weight INTEGER NOT NULL, -- Weight of the grade (e.g., 1 for homework, 2 for exam)
+    grade_type TEXT NOT NULL CHECK(grade_type IN ('numeric', 'comment','behavior note','custom')), -- Type of entry: numeric, comment, or custom
     date TEXT NOT NULL CHECK(date GLOB '[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]'), -- Date of entry in YYYY-MM-DD format
     FOREIGN KEY(user_id) REFERENCES users(uid),
     FOREIGN KEY(subject_id) REFERENCES subjects(id)
+    FOREIGN KEY(teacher_id) REFERENCES users(uid),
+    FOREIGN KEY(exam_id) REFERENCES exams(id)
 );
 
 -- Table storing class memberships for users (students and teachers)
@@ -83,6 +88,7 @@ CREATE TABLE IF NOT EXISTS timetable (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     day TEXT NOT NULL CHECK(day IN ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')), -- Day of the week
     subject_id INTEGER NOT NULL, -- Subject ID
+    class_period INTEGER NOT NULL, -- Class period (number)
     time_start TEXT NOT NULL CHECK(time_start GLOB '[0-2][0-9]:[0-5][0-9]'), -- Start time in HH:MM format
     time_end TEXT NOT NULL CHECK(time_end GLOB '[0-2][0-9]:[0-5][0-9]'), -- End time in HH:MM format
     room TEXT, -- Room number or name
@@ -91,6 +97,31 @@ CREATE TABLE IF NOT EXISTS timetable (
     FOREIGN KEY(class_name) REFERENCES classes(name),
     FOREIGN KEY(teacher_id) REFERENCES users(uid),
     FOREIGN KEY(subject_id) REFERENCES subjects(id)
+);
+
+-- Table storing frequency of student attendance
+CREATE TABLE IF NOT EXISTS attendance (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL, -- Student ID
+    subject_id INTEGER NOT NULL, -- Subject ID
+    date TEXT NOT NULL CHECK(date GLOB '[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]'), -- Date of attendance in YYYY-MM-DD format
+    status TEXT NOT NULL CHECK(status IN ('present', 'absent', 'late')), -- Attendance status
+    FOREIGN KEY(user_id) REFERENCES users(uid),
+    FOREIGN KEY(subject_id) REFERENCES subjects(id)
+);
+
+-- Table storing exam and exam dates
+CREATE TABLE IF NOT EXISTS exams{
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    class_name TEXT NOT NULL, -- Class name
+    teacher_id INTEGER NOT NULL, -- Teacher ID
+    subject_id INTEGER NOT NULL, -- Subject ID
+    date TEXT NOT NULL CHECK(date GLOB '[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]'), -- Date of attendance in YYYY-MM-DD format
+    type TEXT NOT NULL CHECK(type IN ('exam', 'exam','homework','presentation','essay','analysis','written assignment','quiz','pop quiz','other')), -- Type of exam
+    description TEXT, -- Description of the exam
+    FOREIGN KEY(class_name) REFERENCES classes(name),
+    FOREIGN KEY(subject_id) REFERENCES subjects(id)
+    FOREIGN KEY(teacher_id) REFERENCES users(uid)
 );
 
 -- Indexes for foreign keys to improve query performance
@@ -108,3 +139,5 @@ CREATE INDEX idx_class_members_class_name ON class_members(class_name);
 CREATE INDEX idx_timetable_teacher_id ON timetable(teacher_id);
 CREATE INDEX idx_timetable_class_name ON timetable(class_name);
 CREATE INDEX idx_timetable_subject_id ON timetable(subject_id);
+CREATE INDEX idx_attendance_user_id ON attendance(user_id);
+CREATE INDEX idx_exams_user_id ON exams(user_id);

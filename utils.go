@@ -1,6 +1,14 @@
 package main
 import (
 	"golang.org/x/crypto/bcrypt"
+    "math/rand"
+    "sync"
+    "time"
+)
+var (
+	randomNum        int
+	lastGeneratedDate time.Time
+	mu               sync.Mutex
 )
 
 func HashPassword(password string) (string, error) {
@@ -17,4 +25,23 @@ func TableExists(tableName string) bool {
     var name string
     err := db.QueryRow(query, tableName).Scan(&name)
     return err == nil
+}
+
+func generateRandomNumber() int {
+    return rand.Intn(35) + 1
+}
+
+func getRandomNumber() int {
+    mu.Lock()
+    defer mu.Unlock()
+
+    today := time.Now().Truncate(24 * time.Hour)
+
+    if lastGeneratedDate.Equal(today) {
+        return randomNum
+    }
+
+    randomNum = generateRandomNumber()
+    lastGeneratedDate = today
+    return randomNum
 }

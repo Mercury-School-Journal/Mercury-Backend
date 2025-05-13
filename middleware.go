@@ -40,7 +40,6 @@ func ValidateToken(c *gin.Context) (string, string, error) {
     return claims.Email, claims.Role, nil
 }
 
-// TokenAuthMiddleware authenticates requests using JWT
 func TokenAuthMiddleware() gin.HandlerFunc {
     return func(c *gin.Context) {
         email, role, err := ValidateToken(c)
@@ -49,7 +48,6 @@ func TokenAuthMiddleware() gin.HandlerFunc {
             c.Abort()
             return
         }
-        // Set email and role in context for downstream handlers
         c.Set("email", email)
         c.Set("role", role)
         c.Next()
@@ -65,15 +63,12 @@ func AdminAuthMiddleware() gin.HandlerFunc {
             c.Abort()
             return
         }
-
-        // Verify admin role from token claims
         if role != "admin" {
             c.JSON(http.StatusForbidden, gin.H{"message": "Forbidden"})
             c.Abort()
             return
         }
 
-        // Additional database check for consistency
         var storedRole string
         err = db.QueryRow("SELECT role FROM users WHERE email = ?", email).Scan(&storedRole)
         if err != nil {
@@ -100,15 +95,13 @@ func TeacherAuthMiddleware() gin.HandlerFunc {
             c.Abort()
             return
         }
-
-        // Verify teacher role from token claims
         if role != "teacher" {
             c.JSON(http.StatusForbidden, gin.H{"message": "Forbidden"})
             c.Abort()
             return
         }
 
-        // Additional database check for consistency
+
         var storedRole string
         err = db.QueryRow("SELECT role FROM users WHERE email = ?", email).Scan(&storedRole)
         if err != nil {
@@ -117,6 +110,38 @@ func TeacherAuthMiddleware() gin.HandlerFunc {
             return
         }
         if storedRole != "teacher" {
+            c.JSON(http.StatusForbidden, gin.H{"message": "Forbidden"})
+            c.Abort()
+            return
+        }
+
+        c.Next()
+    }
+}
+
+func StudentAuthMiddleware() gin.HandlerFunc {
+    return func(c *gin.Context) {
+        email, role, err := ValidateToken(c)
+        if err != nil {
+            c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+            c.Abort()
+            return
+        }
+
+        if role != "student" {
+            c.JSON(http.StatusForbidden, gin.H{"message": "Forbidden"})
+            c.Abort()
+            return
+        }
+
+        var storedRole string
+        err = db.QueryRow("SELECT role FROM users WHERE email = ?", email).Scan(&storedRole)
+        if err != nil {
+            c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid credentials"})
+            c.Abort()
+            return
+        }
+        if storedRole != "student" {
             c.JSON(http.StatusForbidden, gin.H{"message": "Forbidden"})
             c.Abort()
             return
