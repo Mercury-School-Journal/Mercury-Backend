@@ -176,7 +176,7 @@ func registerUser(reader *bufio.Reader) {
 	}
 
 	body, _ := json.Marshal(user)
-	req, _ := http.NewRequest("POST", baseURL+"/register", bytes.NewBuffer(body))
+	req, _ := http.NewRequest("POST", baseURL+"/admin/register", bytes.NewBuffer(body))
 	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("Content-Type", "application/json")
 
