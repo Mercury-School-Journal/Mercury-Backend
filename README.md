@@ -470,13 +470,6 @@ KEY_PATH=key.pem
      curl -X POST http://localhost:10800/api/login -H "Content-Type: application/json" -d '{"email":"admin@example.com","password":"secret123"}'
      ```
 
-## 9. Security
-- **Passwords**: Passwords are hashed using `bcrypt` before being stored in the database.
-- **JWT**: JWT tokens are signed with the `JWT_KEY` and have a 7-day validity period.
-- **Roles**: `AdminAuthMiddleware`, `TeacherAuthMiddleware`, and `StudentAuthMiddleware` restrict access to appropriate roles.
-- **CORS**: Settings allow requests from any origin, which may need tightening in production.
-- **HTTPS**: Optional HTTPS support (requires certificates).
-
 ## 10. Implementation Notes
 - The `/api/grades/:user_id` endpoint requires a `user_id` parameter in the URL path, which is handled in the CLI client by dynamically building the address.
 - Functions like `/api/admin/class`, `/api/teacher/class`, `/api/admin/student-grades`, `/api/teacher/student-grades`, etc., require sending data in JSON format with the `name` or `uid` field.
