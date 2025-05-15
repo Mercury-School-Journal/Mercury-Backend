@@ -250,21 +250,21 @@ func GetTimetable(c *gin.Context) {
 	role, _ := c.Get("role")
 	var user User
 	var classmember ClassMember
-	err := db.QueryRow("SELECT uid, email, class_name FROM users INNER JOIN class_members ON user.uid = class_members.user_id WHERE email = ?", email).Scan(&user.UID, &user.Email, &classmember.ClassName)
+	err := db.QueryRow("SELECT uid, email, class_name FROM users INNER JOIN class_members ON users.uid = class_members.user_id WHERE email = ?", email).Scan(&user.UID, &user.Email, &classmember.ClassName)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
 		return
 	}
 	var rows *sql.Rows
 	if role == "student" {
-		rows, err := db.Query("SELECT id, day, subject_id, time_start, time_end, room, teacher_id, class_name FROM timetable WHERE class_name = ?", classmember.ClassName)
+		rows, err := db.Query("SELECT id, day, subject_id, class_period, time_start, time_end, room, teacher_id, class_name FROM timetable WHERE class_name = ?", classmember.ClassName)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "Error retrieving timetable"})
 			return
 		}
 		defer rows.Close()
 	} else if role == "teacher" {
-		rows, err := db.Query("SELECT id, day, subject_id, time_start, time_end, room, teacher_id, class_name FROM timetable WHERE teacher_id = ?", user.UID)
+		rows, err := db.Query("SELECT id, day, subject_id, class_period, time_start, time_end, room, teacher_id, class_name FROM timetable WHERE teacher_id = ?", user.UID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "Error retrieving timetable"})
 			return
@@ -274,7 +274,7 @@ func GetTimetable(c *gin.Context) {
 	var timetable []TimetableEntry
 	for rows.Next() {
 		var entry TimetableEntry
-		if err := rows.Scan(&entry.ID, &entry.Day, &entry.SubjectID, &entry.StartTime, &entry.EndTime, &entry.Room, &entry.TeacherID, &entry.ClassName); err != nil {
+		if err := rows.Scan(&entry.ID, &entry.Day, &entry.SubjectID, &entry.ClassPeriod, &entry.StartTime, &entry.EndTime, &entry.Room, &entry.TeacherID, &entry.ClassName); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "Error scanning timetable entry"})
 			return
 		}
@@ -350,6 +350,10 @@ func GetSubjects(c *gin.Context) {
 
 	var classmember ClassMember
 	err = db.QueryRow("SELECT class_name FROM class_members WHERE user_id = ?", user.UID).Scan(&classmember.ClassName)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
+		return
+	}
 
 	var subjects []Subject
 	rows, err := db.Query("SELECT id, name, class_name, teacher_id FROM subjects WHERE class_name = ?", classmember.ClassName)

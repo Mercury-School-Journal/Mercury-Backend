@@ -70,14 +70,15 @@ type ClassMember struct {
 
 // TimetableEntry represents a single timetable entry
 type TimetableEntry struct {
-	ID        uint   `json:"id"`
-	Day       string `json:"day"`        // Day of the week (e.g., "Monday")
-	SubjectID uint   `json:"subject_id"` // Reference to subjects(id)
-	StartTime string `json:"start_time"` // Start time in HH:MM format
-	EndTime   string `json:"end_time"`   // End time in HH:MM format
-	Room      string `json:"room"`       // Room number or name
-	TeacherID uint   `json:"teacher_id"` // Reference to users(uid)
-	ClassName string `json:"class_name"` // Reference to classes(name)
+	ID          uint   `json:"id"`
+	Day         string `json:"day"`          // Day of the week (e.g., "Monday")
+	SubjectID   uint   `json:"subject_id"`   // Reference to subjects(id)
+	ClassPeriod uint   `json:"class_period"` // Class period number (e.g., 1, 2, 3)
+	StartTime   string `json:"start_time"`   // Start time in HH:MM format
+	EndTime     string `json:"end_time"`     // End time in HH:MM format
+	Room        string `json:"room"`         // Room number or name
+	TeacherID   uint   `json:"teacher_id"`   // Reference to users(uid)
+	ClassName   string `json:"class_name"`   // Reference to classes(name)
 }
 
 // AccessRequest represents a login request
@@ -110,11 +111,11 @@ type Attendance struct {
 
 // Exam represents a exam or test
 type Exam struct {
-	ID        uint   `json:"id"`
-	ClassName string `json:"class_name"` // Reference to classes(name)
-	SubjectID uint   `json:"subject_id"` // Reference to subjects(id)
-	TeacherID uint   `json:"teacher_id"` // Reference to users(uid)
-	Date      string `json:"date"`       // Date of the exam in YYYY-MM-DD format
-	Type      string `json:"type"`      // Type of exam (e.g., "exam", "test", "quiz")
+	ID          uint   `json:"id"`
+	ClassName   string `json:"class_name"`  // Reference to classes(name)
+	SubjectID   uint   `json:"subject_id"`  // Reference to subjects(id)
+	TeacherID   uint   `json:"teacher_id"`  // Reference to users(uid)
+	Date        string `json:"date"`        // Date of the exam in YYYY-MM-DD format
+	Type        string `json:"type"`        // Type of exam (e.g., "exam", "test", "quiz")
 	Description string `json:"description"` // Description of the exam
 }
