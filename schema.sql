@@ -111,13 +111,13 @@ CREATE TABLE IF NOT EXISTS attendance (
 );
 
 -- Table storing exam and exam dates
-CREATE TABLE IF NOT EXISTS exams{
+CREATE TABLE IF NOT EXISTS exams(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     class_name TEXT NOT NULL, -- Class name
     teacher_id INTEGER NOT NULL, -- Teacher ID
     subject_id INTEGER NOT NULL, -- Subject ID
     date TEXT NOT NULL CHECK(date GLOB '[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]'), -- Date of attendance in YYYY-MM-DD format
-    type TEXT NOT NULL CHECK(type IN ('exam', 'exam','homework','presentation','essay','analysis','written assignment','quiz','pop quiz','other')), -- Type of exam
+    type TEXT NOT NULL CHECK(type IN ('test', 'exam','homework','presentation','essay','analysis','written assignment','quiz','pop quiz','other')), -- Type of exam
     description TEXT, -- Description of the exam
     FOREIGN KEY(class_name) REFERENCES classes(name),
     FOREIGN KEY(subject_id) REFERENCES subjects(id)
@@ -140,4 +140,4 @@ CREATE INDEX idx_timetable_teacher_id ON timetable(teacher_id);
 CREATE INDEX idx_timetable_class_name ON timetable(class_name);
 CREATE INDEX idx_timetable_subject_id ON timetable(subject_id);
 CREATE INDEX idx_attendance_user_id ON attendance(user_id);
-CREATE INDEX idx_exams_user_id ON exams(user_id);
+CREATE INDEX idx_exams_class_name ON exams(class_name);
